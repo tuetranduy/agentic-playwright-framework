@@ -12,7 +12,8 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/results.xml' }]
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    headless: false,
+    baseURL: process.env.BASE_URL || 'https://demo.api-platform.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

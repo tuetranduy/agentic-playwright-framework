@@ -1,20 +1,25 @@
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ConfigManager } from '../config/config';
 import { logger } from '../utils/logger';
 import { AIAnalysisResult, TestFailure } from '../types';
 
 export class AIService {
   private static instance: AIService;
-  private client: OpenAI | null = null;
+  private client: OpenAI | GoogleGenerativeAI | null = null;
   private config = ConfigManager.getInstance().getConfig();
 
   private constructor() {
     if (this.config.ai.enabled && this.config.ai.apiKey) {
       try {
-        this.client = new OpenAI({
-          apiKey: this.config.ai.apiKey,
-        });
-        logger.info('AI Service initialized successfully');
+        if (this.config.ai.provider === 'gemini') {
+          this.client = new GoogleGenerativeAI(this.config.ai.apiKey);
+        } else {
+          this.client = new OpenAI({
+            apiKey: this.config.ai.apiKey,
+          });
+        }
+        logger.info(`AI Service initialized successfully for provider: ${this.config.ai.provider}`);
       } catch (error) {
         logger.error('Failed to initialize AI Service', error);
       }
@@ -58,18 +63,32 @@ Please suggest 3-5 alternative Playwright selectors that might work better. Focu
 
 Return ONLY the selectors, one per line, without explanation.`;
 
-      const response = await this.client.chat.completions.create({
-        model: this.config.ai.model || 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        max_tokens: 500,
-      });
+      let suggestions: string[] | undefined;
 
-      const suggestions = response.choices[0]?.message?.content
-        ?.split('\n')
-        .filter((line) => line.trim().length > 0)
-        .map((line) => line.trim().replace(/^[-*]\s*/, ''))
-        .filter((line) => !line.match(/^\d+\./));
+      if (this.client instanceof GoogleGenerativeAI) {
+        const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        suggestions = response.text()
+          ?.split('\n')
+          .filter((line) => line.trim().length > 0)
+          .map((line) => line.trim().replace(/^[-*]\s*/, ''))
+          .filter((line) => !line.match(/^\d+\./));
+      } else if (this.client instanceof OpenAI) {
+        const response = await this.client.chat.completions.create({
+          model: this.config.ai.model || 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: 500,
+        });
+
+        suggestions = response.choices[0]?.message?.content
+          ?.split('\n')
+          .filter((line) => line.trim().length > 0)
+          .map((line) => line.trim().replace(/^[-*]\s*/, ''))
+          .filter((line) => !line.match(/^\d+\./));
+      }
+
 
       return suggestions || this.getDefaultSuggestions(failedSelector);
     } catch (error) {
@@ -113,15 +132,24 @@ Format your response as JSON:
   "confidence": 0.85
 }`;
 
-      const response = await this.client.chat.completions.create({
-        model: this.config.ai.model || 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
-        max_tokens: 1000,
-        response_format: { type: 'json_object' },
-      });
+      let content: string | null | undefined;
 
-      const content = response.choices[0]?.message?.content;
+      if (this.client instanceof GoogleGenerativeAI) {
+        const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        content = response.text();
+      } else if (this.client instanceof OpenAI) {
+        const response = await this.client.chat.completions.create({
+          model: this.config.ai.model || 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.5,
+          max_tokens: 1000,
+          response_format: { type: 'json_object' },
+        });
+        content = response.choices[0]?.message?.content;
+      }
+
       if (content) {
         return JSON.parse(content) as AIAnalysisResult;
       }

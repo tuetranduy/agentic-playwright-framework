@@ -185,7 +185,7 @@ test.describe('Tests with AI-powered analysis', () => {
       ai: {
         enabled: true,
         provider: 'openai',
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.GEMINI_API_KEY,
         model: 'gpt-3.5-turbo',
         maxRetries: 3,
       },
@@ -434,7 +434,7 @@ test('Complete checkout flow with self-healing', async ({ page }) => {
 1. **Set up environment**:
    ```bash
    cp .env.example .env
-   # Add your OPENAI_API_KEY if you want AI features
+   # Add your GEMINI_API_KEY if you want AI features
    ```
 
 2. **Install dependencies**:

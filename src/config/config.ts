@@ -1,7 +1,7 @@
 export interface FrameworkConfig {
   ai: {
     enabled: boolean;
-    provider: 'openai' | 'custom';
+    provider: 'openai' | 'gemini' | 'custom';
     apiKey?: string;
     model?: string;
     maxRetries?: number;

@@ -8,13 +8,18 @@ export class ExampleLoginPage extends AgenticPage {
   private readonly loginButton = 'button[type="submit"]';
   private readonly errorMessage = '.error-message';
   private readonly successMessage = '.success-message';
+  private readonly loginLink = '//a[text()="Log in"]';
 
   constructor(page: Page) {
     super(page);
   }
 
+  async navigateToBook(): Promise<void> {
+    await this.goto('/books');
+  }
+
   async navigateToLogin(): Promise<void> {
-    await this.goto('https://example.com/login');
+    await this.click(this.loginLink, 'Login link');
   }
 
   async login(username: string, password: string): Promise<void> {

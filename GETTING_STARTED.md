@@ -38,7 +38,7 @@ cp .env.example .env
 
 Edit `.env`:
 ```env
-OPENAI_API_KEY=your-openai-api-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
 LOG_LEVEL=info
 ```
 
@@ -97,7 +97,7 @@ test.describe('My First Agentic Test', () => {
     ConfigManager.getInstance().updateConfig({
       ai: {
         enabled: true,
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.GEMINI_API_KEY,
       },
       selfHealing: {
         enabled: true,
@@ -378,7 +378,7 @@ config.updateConfig({
 - name: Run Tests
   run: npm test
   env:
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
 - name: Upload Reports
   uses: actions/upload-artifact@v3

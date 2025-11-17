@@ -47,7 +47,7 @@ configManager.updateConfig({
   ai: {
     enabled: true,
     provider: 'openai',
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.GEMINI_API_KEY,
     model: 'gpt-3.5-turbo',
     maxRetries: 3,
   },
@@ -70,7 +70,7 @@ configManager.updateConfig({
 Create a `.env` file:
 
 ```env
-OPENAI_API_KEY=your-openai-api-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
 LOG_LEVEL=info
 ```
 

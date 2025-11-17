@@ -134,7 +134,7 @@ import { ConfigManager } from 'agentic-playwright-framework';
 ConfigManager.getInstance().updateConfig({
   ai: {
     enabled: true,
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.GEMINI_API_KEY,
   },
   selfHealing: {
     enabled: true,
