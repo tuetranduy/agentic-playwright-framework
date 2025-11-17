@@ -178,6 +178,7 @@ export class SelfHealingService {
     if (selector.startsWith('role=')) {
       const roleMatch = selector.match(/role=(\w+)(?:\[name="([^"]+)"\])?/);
       if (roleMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const role = roleMatch[1] as any;
         const name = roleMatch[2];
         return name ? page.getByRole(role, { name }) : page.getByRole(role);

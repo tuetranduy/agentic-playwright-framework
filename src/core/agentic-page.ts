@@ -1,4 +1,4 @@
-import { Page, Locator, test } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { SelfHealingService } from '../services/self-healing-service';
 import { logger } from '../utils/logger';
 
@@ -155,7 +155,8 @@ export class AgenticPage {
   /**
    * Execute JavaScript in page context
    */
-  async evaluate<R>(pageFunction: string | ((arg: any) => R), arg?: any): Promise<R> {
+  async evaluate<R>(pageFunction: string | ((arg: unknown) => R), arg?: unknown): Promise<R> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.page.evaluate(pageFunction as any, arg);
   }
 

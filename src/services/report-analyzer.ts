@@ -4,7 +4,7 @@ import { ConfigManager } from '../config/config';
 import { logger } from '../utils/logger';
 import { AIService } from './ai-service';
 import { SelfHealingService } from './self-healing-service';
-import { ReportAnalysis, TestFailure, AIAnalysisResult } from '../types';
+import { ReportAnalysis, TestFailure } from '../types';
 
 export class ReportAnalyzer {
   private static instance: ReportAnalyzer;
@@ -54,7 +54,7 @@ export class ReportAnalyzer {
     }
   }
 
-  private parseResults(results: any): ReportAnalysis {
+  private parseResults(results: Record<string, unknown>): ReportAnalysis {
     const analysis: ReportAnalysis = {
       totalTests: 0,
       passed: 0,
@@ -65,43 +65,47 @@ export class ReportAnalyzer {
     };
 
     if (results.suites) {
-      this.parseSuites(results.suites, analysis);
+      this.parseSuites(results.suites as Array<Record<string, unknown>>, analysis);
     }
 
     // Handle different result formats
     if (results.stats) {
-      analysis.totalTests = results.stats.tests || 0;
-      analysis.passed = results.stats.passes || 0;
-      analysis.failed = results.stats.failures || 0;
-      analysis.skipped = results.stats.skipped || 0;
+      const stats = results.stats as Record<string, number>;
+      analysis.totalTests = stats.tests || 0;
+      analysis.passed = stats.passes || 0;
+      analysis.failed = stats.failures || 0;
+      analysis.skipped = stats.skipped || 0;
     }
 
     return analysis;
   }
 
-  private parseSuites(suites: any[], analysis: ReportAnalysis): void {
+  private parseSuites(suites: Array<Record<string, unknown>>, analysis: ReportAnalysis): void {
     for (const suite of suites) {
       if (suite.specs) {
-        for (const spec of suite.specs) {
+        const specs = suite.specs as Array<Record<string, unknown>>;
+        for (const spec of specs) {
           analysis.totalTests++;
 
           if (spec.ok) {
             analysis.passed++;
           } else if (spec.tests) {
-            const test = spec.tests[0];
-            if (test?.results?.[0]?.status === 'skipped') {
+            const tests = spec.tests as Array<Record<string, unknown>>;
+            const test = tests[0];
+            const results = test?.results as Array<Record<string, unknown>> | undefined;
+            if (results?.[0]?.status === 'skipped') {
               analysis.skipped++;
             } else {
               analysis.failed++;
+              const result = results?.[0] as Record<string, unknown> | undefined;
+              const error = result?.error as Record<string, string> | undefined;
+              const attachments = result?.attachments as Array<Record<string, string>> | undefined;
               const failure: TestFailure = {
-                testName: spec.title || 'Unknown test',
-                error: test?.results?.[0]?.error?.message || 'Unknown error',
-                screenshot: test?.results?.[0]?.attachments?.find(
-                  (a: any) => a.name === 'screenshot'
-                )?.path,
-                trace: test?.results?.[0]?.attachments?.find((a: any) => a.name === 'trace')
-                  ?.path,
-                timestamp: new Date(test?.results?.[0]?.startTime || Date.now()),
+                testName: (spec.title as string) || 'Unknown test',
+                error: error?.message || 'Unknown error',
+                screenshot: attachments?.find((a) => a.name === 'screenshot')?.path,
+                trace: attachments?.find((a) => a.name === 'trace')?.path,
+                timestamp: new Date((result?.startTime as number) || Date.now()),
               };
               analysis.failures.push(failure);
             }
@@ -110,7 +114,7 @@ export class ReportAnalyzer {
       }
 
       if (suite.suites) {
-        this.parseSuites(suite.suites, analysis);
+        this.parseSuites(suite.suites as Array<Record<string, unknown>>, analysis);
       }
     }
   }
