@@ -8,3 +8,11 @@ logs/
 .env
 .DS_Store
 coverage/
+# Build artifacts
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+# But keep config files
+!playwright.config.js
+!*.config.js
