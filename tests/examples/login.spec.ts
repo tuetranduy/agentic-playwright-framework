@@ -7,14 +7,13 @@ test.describe('Example Login Tests with Agentic Framework', () => {
   let loginPage: ExampleLoginPage;
 
   test.beforeAll(() => {
-    // Configure the framework (optional - uses defaults if not configured)
     const configManager = ConfigManager.getInstance();
     configManager.updateConfig({
       ai: {
         enabled: true,
         provider: 'gemini',
-        apiKey: process.env.GEMINI_API_KEY, // Set this in your environment
-        model: 'gemini-pro',
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-2.5-flash-lite',
       },
       selfHealing: {
         enabled: true,
@@ -34,27 +33,22 @@ test.describe('Example Login Tests with Agentic Framework', () => {
   });
 
   test('should demonstrate self-healing login', async () => {
-    // This test demonstrates the self-healing capability
-    // Even if the selectors change slightly, the framework will attempt to find elements
     await loginPage.navigateToBook();
     await loginPage.navigateToLogin();
     await loginPage.login('testuser', 'testpass');
-
-    // The framework will automatically try to heal broken locators
-    // and log all attempts
   });
 
   test('should handle form validation', async () => {
     await loginPage.navigateToBook();
     await loginPage.navigateToLogin();
-    await loginPage.login('', ''); // Invalid credentials
+    await loginPage.login('', '');
 
     const errorMsg = await loginPage.getErrorMessage();
+    console.log('Captured error message:', errorMsg);
     expect(errorMsg).toBeTruthy();
   });
 
   test.afterAll(async () => {
-    // Generate AI-powered report analysis
     const analyzer = ReportAnalyzer.getInstance();
     const analysis = await analyzer.analyzeResults();
 

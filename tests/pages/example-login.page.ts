@@ -2,13 +2,12 @@ import { AgenticPage } from '../../src/core/agentic-page';
 import { Page } from '@playwright/test';
 
 export class ExampleLoginPage extends AgenticPage {
-  // Selectors
   private readonly usernameInput = '#username';
   private readonly passwordInput = '#password';
   private readonly loginButton = 'button[type="submit"]';
-  private readonly errorMessage = '.error-message';
+  private readonly errorMessage = 'text=Invalid username or password.';
   private readonly successMessage = '.success-message';
-  private readonly loginLink = '//a[text()="Log in"]';
+  private readonly loginLink = '//link[text()="Log in"]';
 
   constructor(page: Page) {
     super(page);

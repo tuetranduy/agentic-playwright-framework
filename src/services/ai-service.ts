@@ -12,12 +12,19 @@ export class AIService {
   private constructor() {
     if (this.config.ai.enabled && this.config.ai.apiKey) {
       try {
-        if (this.config.ai.provider === 'gemini') {
-          this.client = new GoogleGenerativeAI(this.config.ai.apiKey);
-        } else {
-          this.client = new OpenAI({
-            apiKey: this.config.ai.apiKey,
-          });
+        switch (this.config.ai.provider?.toLowerCase?.()) {
+          case 'gemini':
+            this.client = new GoogleGenerativeAI(this.config.ai.apiKey);
+            break;
+          case 'openai':
+          default:
+            if (this.config.ai.provider && this.config.ai.provider.toLowerCase() !== 'openai') {
+              logger.warn(`Unknown AI provider "${this.config.ai.provider}", defaulting to OpenAI`);
+            }
+            this.client = new OpenAI({
+              apiKey: this.config.ai.apiKey,
+            });
+            break;
         }
         logger.info(`AI Service initialized successfully for provider: ${this.config.ai.provider}`);
       } catch (error) {
@@ -35,11 +42,7 @@ export class AIService {
     return AIService.instance;
   }
 
-  async suggestLocator(
-    elementDescription: string,
-    pageContent: string,
-    failedSelector: string
-  ): Promise<string[]> {
+  async suggestLocator(elementDescription: string, pageContent: string, failedSelector: string): Promise<string[]> {
     if (!this.client) {
       logger.warn('AI Service not available, returning default suggestions');
       return this.getDefaultSuggestions(failedSelector);
@@ -47,48 +50,50 @@ export class AIService {
 
     try {
       const prompt = `You are an expert in web automation and Playwright selectors. 
-A test failed because the selector "${failedSelector}" could not find the element.
+                      A test failed because the selector "${failedSelector}" could not find the element.
+                      Element description: ${elementDescription}
+                      Page HTML snippet: ${pageContent}
 
-Element description: ${elementDescription}
+                      Please suggest 3-5 alternative Playwright selectors that might work better. Focus on:
+                      1. Text-based selectors
+                      2. Role-based selectors (getByRole)
+                      3. Test IDs
+                      4. Robust CSS selectors
+                      5. XPath as last resort
 
-Page HTML snippet:
-${pageContent.substring(0, 2000)}
-
-Please suggest 3-5 alternative Playwright selectors that might work better. Focus on:
-1. Text-based selectors
-2. Role-based selectors (getByRole)
-3. Test IDs
-4. Robust CSS selectors
-5. XPath as last resort
-
-Return ONLY the selectors, one per line, without explanation.`;
+                      Return ONLY the selectors, one per line, without explanation.`;
 
       let suggestions: string[] | undefined;
 
-      if (this.client instanceof GoogleGenerativeAI) {
-        const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        suggestions = response.text()
-          ?.split('\n')
-          .filter((line) => line.trim().length > 0)
-          .map((line) => line.trim().replace(/^[-*]\s*/, ''))
-          .filter((line) => !line.match(/^\d+\./));
-      } else if (this.client instanceof OpenAI) {
-        const response = await this.client.chat.completions.create({
-          model: this.config.ai.model || 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.3,
-          max_tokens: 500,
-        });
-
-        suggestions = response.choices[0]?.message?.content
-          ?.split('\n')
-          .filter((line) => line.trim().length > 0)
-          .map((line) => line.trim().replace(/^[-*]\s*/, ''))
-          .filter((line) => !line.match(/^\d+\./));
+      switch (true) {
+        case this.client instanceof GoogleGenerativeAI: {
+          const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
+          const result = await model.generateContent(prompt);
+          const response = result.response;
+          suggestions = response.text()
+            ?.split('\n')
+            .filter(line => line.trim().length > 0)
+            .map(line => line.trim().replace(/^[-*]\s*/, ''))
+            .filter(line => !/^\d+\./.test(line));
+          break;
+        }
+        case this.client instanceof OpenAI: {
+          const response = await this.client.chat.completions.create({
+            model: this.config.ai.model || 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.3,
+            max_tokens: 500,
+          });
+          suggestions = response.choices[0]?.message?.content
+            ?.split('\n')
+            .filter(line => line.trim().length > 0)
+            .map(line => line.trim().replace(/^[-*]\s*/, ''))
+            .filter(line => !/^\d+\./.test(line));
+          break;
+        }
+        default:
+          suggestions = this.getDefaultSuggestions(failedSelector);
       }
-
 
       return suggestions || this.getDefaultSuggestions(failedSelector);
     } catch (error) {
@@ -116,42 +121,54 @@ Return ONLY the selectors, one per line, without explanation.`;
 
       const prompt = `You are an expert test automation analyst. Analyze these test failures and provide insights:
 
-${failureDetails}
+                      ${failureDetails}
 
-Provide:
-1. A concise summary of the failures
-2. The likely root cause
-3. 3-5 actionable suggestions to fix the issues
-4. Your confidence level (0-1)
+                      Provide:
+                      1. A concise summary of the failures
+                      2. The likely root cause
+                      3. 3-5 actionable suggestions to fix the issues
+                      4. Your confidence level (0-1)
 
-Format your response as JSON:
-{
-  "summary": "brief summary",
-  "rootCause": "likely root cause",
-  "suggestions": ["suggestion 1", "suggestion 2", ...],
-  "confidence": 0.85
-}`;
+                      Format your response as JSON:
+                      {
+                        "summary": "brief summary",
+                        "rootCause": "likely root cause",
+                        "suggestions": ["suggestion 1", "suggestion 2", ...],
+                        "confidence": 0.85
+                      }`;
 
       let content: string | null | undefined;
 
-      if (this.client instanceof GoogleGenerativeAI) {
-        const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        content = response.text();
-      } else if (this.client instanceof OpenAI) {
-        const response = await this.client.chat.completions.create({
-          model: this.config.ai.model || 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.5,
-          max_tokens: 1000,
-          response_format: { type: 'json_object' },
-        });
-        content = response.choices[0]?.message?.content;
+      switch (true) {
+        case this.client instanceof GoogleGenerativeAI: {
+          const model = this.client.getGenerativeModel({ model: this.config.ai.model || 'gemini-pro' });
+          const result = await model.generateContent(prompt);
+          const response = result.response;
+          content = response.text();
+          break;
+        }
+        case this.client instanceof OpenAI: {
+          const response = await this.client.chat.completions.create({
+            model: this.config.ai.model || 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.5,
+            max_tokens: 1000,
+            response_format: { type: 'json_object' },
+          });
+          content = response.choices[0]?.message?.content;
+          break;
+        }
       }
 
       if (content) {
-        return JSON.parse(content) as AIAnalysisResult;
+        const jsonMatch = content.match(/{[\s\S]*}/);
+        if (jsonMatch) {
+          try {
+            return JSON.parse(jsonMatch[0]) as AIAnalysisResult;
+          } catch (e) {
+            logger.error('Failed to parse JSON from AI response', e);
+          }
+        }
       }
 
       return this.getDefaultAnalysis();

@@ -27,9 +27,10 @@ export interface FrameworkConfig {
 export const defaultConfig: FrameworkConfig = {
   ai: {
     enabled: true,
-    provider: 'openai',
-    model: 'gpt-3.5-turbo',
+    provider: 'gemini',
+    model: 'gemini-2.5-flash-lite',
     maxRetries: 3,
+    apiKey: process.env.GEMINI_API_KEY,
   },
   selfHealing: {
     enabled: true,
@@ -43,7 +44,7 @@ export const defaultConfig: FrameworkConfig = {
     outputPath: './test-results',
   },
   timeouts: {
-    default: 30000,
+    default: 60000,
     navigation: 60000,
     action: 10000,
   },

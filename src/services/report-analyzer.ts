@@ -12,7 +12,7 @@ export class ReportAnalyzer {
   private aiService = AIService.getInstance();
   private selfHealingService = SelfHealingService.getInstance();
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): ReportAnalyzer {
     if (!ReportAnalyzer.instance) {
@@ -71,10 +71,10 @@ export class ReportAnalyzer {
     // Handle different result formats
     if (results.stats) {
       const stats = results.stats as Record<string, number>;
-      analysis.totalTests = stats.tests || 0;
-      analysis.passed = stats.passes || 0;
-      analysis.failed = stats.failures || 0;
+      analysis.passed = stats.expected || 0;
+      analysis.failed = stats.unexpected || 0;
       analysis.skipped = stats.skipped || 0;
+      analysis.totalTests = analysis.passed + analysis.failed + analysis.skipped;
     }
 
     return analysis;

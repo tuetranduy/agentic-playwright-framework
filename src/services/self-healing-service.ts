@@ -29,7 +29,6 @@ export class SelfHealingService {
     selector: string,
     elementDescription: string = ''
   ): Promise<Locator | null> {
-    // First, try the cached healed locator if it exists
     const cachedSelector = this.locatorCache.get(selector);
     if (cachedSelector) {
       try {
@@ -42,7 +41,6 @@ export class SelfHealingService {
       }
     }
 
-    // Try the original selector
     try {
       const locator = this.getLocator(page, selector);
       await locator.waitFor({ timeout: 5000 });
@@ -53,11 +51,7 @@ export class SelfHealingService {
     }
   }
 
-  private async healLocator(
-    page: Page,
-    originalSelector: string,
-    elementDescription: string
-  ): Promise<Locator | null> {
+  private async healLocator(page: Page, originalSelector: string, elementDescription: string): Promise<Locator | null> {
     if (!this.config.selfHealing.enabled) {
       logger.info('Self-healing disabled, returning null');
       return null;
@@ -66,7 +60,6 @@ export class SelfHealingService {
     const strategies = this.config.selfHealing.strategies;
     const maxAttempts = this.config.selfHealing.maxAttempts || 5;
 
-    // Get AI suggestions if available
     let aiSuggestions: string[] = [];
     if (this.aiService.isAvailable()) {
       const pageContent = await page.content();
@@ -78,8 +71,8 @@ export class SelfHealingService {
       logger.info(`AI suggested ${aiSuggestions.length} alternative locators`);
     }
 
-    // Try AI suggestions first
-    for (const suggestion of aiSuggestions.slice(0, 3)) {
+    for (const suggestion of aiSuggestions) {
+      console.log(`Trying AI suggested locator: ${suggestion}`);
       try {
         const locator = this.getLocator(page, suggestion);
         await locator.waitFor({ timeout: 3000 });
@@ -94,12 +87,7 @@ export class SelfHealingService {
       }
     }
 
-    // Fallback to traditional strategies
-    const fallbackSelectors = await this.generateFallbackSelectors(
-      page,
-      originalSelector,
-      strategies
-    );
+    const fallbackSelectors = await this.generateFallbackSelectors(page, originalSelector, strategies);
 
     for (let i = 0; i < Math.min(fallbackSelectors.length, maxAttempts); i++) {
       const strategy = fallbackSelectors[i];
@@ -118,17 +106,12 @@ export class SelfHealingService {
     return null;
   }
 
-  private async generateFallbackSelectors(
-    page: Page,
-    originalSelector: string,
-    strategies: Array<'text' | 'role' | 'testId' | 'xpath' | 'css' | 'visual'>
-  ): Promise<LocatorStrategy[]> {
+  private async generateFallbackSelectors(page: Page, originalSelector: string, strategies: Array<'text' | 'role' | 'testId' | 'xpath' | 'css' | 'visual'>): Promise<LocatorStrategy[]> {
     const fallbacks: LocatorStrategy[] = [];
-
-    // Extract potential text from selector
     const textMatch = originalSelector.match(/text=['"]?([^'"]+)['"]?/);
     const idMatch = originalSelector.match(/id=['"]?([^'"]+)['"]?|#(\w+)/);
     const classMatch = originalSelector.match(/class=['"]?([^'"]+)['"]?|\.(\w+)/);
+    const tagMatch = originalSelector.match(/^(\w+)/);
 
     if (strategies.includes('text') && textMatch) {
       fallbacks.push({ type: 'text', selector: `text=${textMatch[1]}` });
@@ -141,10 +124,18 @@ export class SelfHealingService {
       fallbacks.push({ type: 'testId', selector: `[data-test="${id}"]` });
     }
 
-    if (strategies.includes('role')) {
-      fallbacks.push({ type: 'role', selector: 'role=button' });
-      fallbacks.push({ type: 'role', selector: 'role=link' });
-      fallbacks.push({ type: 'role', selector: 'role=textbox' });
+    if (strategies.includes('role') && tagMatch) {
+      const tag = tagMatch[1].toLowerCase();
+      const roleMap: { [key: string]: string } = {
+        button: 'button',
+        a: 'link',
+        input: 'textbox',
+        select: 'combobox',
+        textarea: 'textbox',
+      };
+      if (roleMap[tag]) {
+        fallbacks.push({ type: 'role', selector: `role=${roleMap[tag]}` });
+      }
     }
 
     if (strategies.includes('css') && classMatch) {
@@ -165,7 +156,6 @@ export class SelfHealingService {
   }
 
   private getLocator(page: Page, selector: string): Locator {
-    // Handle special Playwright selectors
     if (selector.startsWith('text=')) {
       const text = selector.substring(5);
       if (text.startsWith('/') && text.endsWith('/i')) {
@@ -188,11 +178,7 @@ export class SelfHealingService {
     return page.locator(selector);
   }
 
-  private async saveHealedLocator(
-    original: string,
-    healed: string,
-    strategy: LocatorStrategy
-  ): Promise<void> {
+  private async saveHealedLocator(original: string, healed: string, strategy: LocatorStrategy): Promise<void> {
     const healedLocator: HealedLocator = {
       original,
       healed,
@@ -232,7 +218,11 @@ export class SelfHealingService {
     try {
       if (fs.existsSync(outputPath)) {
         const data = fs.readFileSync(outputPath, 'utf-8');
-        this.healedLocators = JSON.parse(data);
+        const rawLocators = JSON.parse(data) as HealedLocator[];
+        this.healedLocators = rawLocators.map((hl) => ({
+          ...hl,
+          timestamp: new Date(hl.timestamp),
+        }));
         this.healedLocators.forEach((hl) => {
           this.locatorCache.set(hl.original, hl.healed);
         });
