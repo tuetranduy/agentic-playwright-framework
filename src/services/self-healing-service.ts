@@ -72,7 +72,7 @@ export class SelfHealingService {
     }
 
     for (const suggestion of aiSuggestions) {
-      console.log(`Trying AI suggested locator: ${suggestion}`);
+      logger.info(`Trying AI suggested locator: ${suggestion}`);
       try {
         const locator = this.getLocator(page, suggestion);
         await locator.waitFor({ timeout: 3000 });
