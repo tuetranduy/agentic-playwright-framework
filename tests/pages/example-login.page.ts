@@ -5,7 +5,7 @@ export class ExampleLoginPage extends AgenticPage {
   private readonly usernameInput = '#username';
   private readonly passwordInput = '#password';
   private readonly loginButton = 'button[type="submit"]';
-  private readonly errorMessage = 'text=Invalid username or password.';
+  private readonly errorMessage = '.error-message';
   private readonly successMessage = '.success-message';
   private readonly loginLink = '//link[text()="Log in"]';
 

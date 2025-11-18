@@ -55,21 +55,12 @@ export class ReportAnalyzer {
   }
 
   private parseResults(results: Record<string, unknown>): ReportAnalysis {
-    const analysis: ReportAnalysis = {
-      totalTests: 0,
-      passed: 0,
-      failed: 0,
-      skipped: 0,
-      failures: [],
-      healedLocators: [],
-    };
+    const analysis: ReportAnalysis = this.getEmptyAnalysis();
 
     if (results.suites) {
       this.parseSuites(results.suites as Array<Record<string, unknown>>, analysis);
-    }
-
-    // Handle different result formats
-    if (results.stats) {
+    } else if (results.stats) {
+      // Fallback for a different format that only has stats
       const stats = results.stats as Record<string, number>;
       analysis.passed = stats.expected || 0;
       analysis.failed = stats.unexpected || 0;
