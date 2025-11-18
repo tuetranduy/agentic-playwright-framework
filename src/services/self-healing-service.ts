@@ -75,7 +75,7 @@ export class SelfHealingService {
       logger.info(`Trying AI suggested locator: ${suggestion}`);
       try {
         const locator = this.getLocator(page, suggestion);
-        await locator.waitFor({ timeout: 3000 });
+        await locator.waitFor({ timeout: 5000 });
         await this.saveHealedLocator(originalSelector, suggestion, {
           type: 'css',
           selector: suggestion,

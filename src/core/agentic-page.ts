@@ -2,9 +2,7 @@ import { Page, Locator } from '@playwright/test';
 import { SelfHealingService } from '../services/self-healing-service';
 import { logger } from '../utils/logger';
 
-/**
- * AgenticPage - Base class for page objects with AI-powered self-healing capabilities
- */
+
 export class AgenticPage {
   protected page: Page;
   protected selfHealingService: SelfHealingService;
@@ -14,9 +12,6 @@ export class AgenticPage {
     this.selfHealingService = SelfHealingService.getInstance();
   }
 
-  /**
-   * Navigate to a URL with error handling
-   */
   async goto(url: string, options?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }): Promise<void> {
     try {
       await this.page.goto(url, options);
@@ -27,16 +22,10 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Find element with self-healing capabilities
-   */
   async findElement(selector: string, description?: string): Promise<Locator | null> {
     return this.selfHealingService.findElement(this.page, selector, description || selector);
   }
 
-  /**
-   * Click on an element with self-healing
-   */
   async click(selector: string, description?: string): Promise<void> {
     const locator = await this.findElement(selector, description || `Click ${selector}`);
     if (locator) {
@@ -47,9 +36,6 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Fill input field with self-healing
-   */
   async fill(selector: string, value: string, description?: string): Promise<void> {
     const locator = await this.findElement(selector, description || `Fill ${selector}`);
     if (locator) {
@@ -60,9 +46,6 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Get text content with self-healing
-   */
   async getText(selector: string, description?: string): Promise<string> {
     const locator = await this.findElement(selector, description || `Get text from ${selector}`);
     if (locator) {
@@ -74,9 +57,6 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Check if element is visible with self-healing
-   */
   async isVisible(selector: string, description?: string): Promise<boolean> {
     const locator = await this.findElement(selector, description || `Check visibility ${selector}`);
     if (locator) {
@@ -87,9 +67,6 @@ export class AgenticPage {
     return false;
   }
 
-  /**
-   * Wait for element with self-healing
-   */
   async waitForElement(
     selector: string,
     description?: string,
@@ -103,9 +80,6 @@ export class AgenticPage {
     return locator;
   }
 
-  /**
-   * Select option from dropdown with self-healing
-   */
   async selectOption(
     selector: string,
     value: string | string[],
@@ -120,9 +94,6 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Check/uncheck checkbox with self-healing
-   */
   async check(selector: string, description?: string): Promise<void> {
     const locator = await this.findElement(selector, description || `Check ${selector}`);
     if (locator) {
@@ -143,64 +114,43 @@ export class AgenticPage {
     }
   }
 
-  /**
-   * Take screenshot with automatic naming
-   */
   async takeScreenshot(name?: string): Promise<void> {
     const screenshotName = name || `screenshot-${Date.now()}.png`;
     await this.page.screenshot({ path: `test-results/${screenshotName}`, fullPage: true });
     logger.info(`Screenshot saved: ${screenshotName}`);
   }
 
-  /**
-   * Execute JavaScript in page context
-   */
   async evaluate<R>(pageFunction: string | ((arg: unknown) => R), arg?: unknown): Promise<R> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.page.evaluate(pageFunction as any, arg);
+    const evalFn = this.page.evaluate as unknown as (
+      fn: string | ((arg: unknown) => R),
+      argument?: unknown
+    ) => Promise<R>;
+    return evalFn(pageFunction, arg);
   }
 
-  /**
-   * Get current URL
-   */
   getCurrentUrl(): string {
     return this.page.url();
   }
 
-  /**
-   * Get page title
-   */
   async getTitle(): Promise<string> {
     return this.page.title();
   }
 
-  /**
-   * Reload the page
-   */
   async reload(): Promise<void> {
     await this.page.reload();
     logger.info('Page reloaded');
   }
 
-  /**
-   * Go back in browser history
-   */
   async goBack(): Promise<void> {
     await this.page.goBack();
     logger.info('Navigated back');
   }
 
-  /**
-   * Go forward in browser history
-   */
   async goForward(): Promise<void> {
     await this.page.goForward();
     logger.info('Navigated forward');
   }
 
-  /**
-   * Wait for navigation
-   */
   async waitForNavigation(options?: { timeout?: number; waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }): Promise<void> {
     await this.page.waitForLoadState(options?.waitUntil || 'load', { timeout: options?.timeout });
     logger.info('Navigation completed');
