@@ -12,7 +12,8 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/results.xml' }]
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['./src/reporters/ai-analysis-reporter.ts']
   ],
   use: {
     headless: false,
