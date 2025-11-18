@@ -23,6 +23,7 @@ export class Logger {
         transports: [
           new winston.transports.Console({
             format: winston.format.combine(winston.format.colorize(), logFormat),
+            forceConsole: true,
           }),
           new winston.transports.File({
             filename: path.join(process.cwd(), 'logs', 'framework.log'),

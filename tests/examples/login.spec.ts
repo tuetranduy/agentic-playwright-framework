@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ExampleLoginPage } from '../pages/example-login.page';
+import { logger } from '../../src';
 
 test.describe('Example Login Tests with Agentic Framework', () => {
   let loginPage: ExampleLoginPage;
@@ -12,6 +13,7 @@ test.describe('Example Login Tests with Agentic Framework', () => {
     await loginPage.navigateToBook();
     await loginPage.navigateToLogin();
     await loginPage.login('testuser', 'testpass');
+    logger.info('Login attempted with self-healing locators.');
   });
 
   test('should handle form validation', async () => {
