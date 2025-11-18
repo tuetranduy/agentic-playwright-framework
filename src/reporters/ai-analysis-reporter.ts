@@ -9,19 +9,19 @@ import { ReportAnalyzer } from '../services/report-analyzer';
  * the current run's results instead of stale results from a previous run.
  */
 class AIAnalysisReporter implements Reporter {
-  onBegin(config: FullConfig, suite: Suite) {
+  onBegin(_config: FullConfig, _suite: Suite) {
     // Optional: Log when tests begin
   }
 
-  onTestBegin(test: TestCase, result: TestResult) {
+  onTestBegin(_test: TestCase, _result: TestResult) {
     // Optional: Track test start
   }
 
-  onTestEnd(test: TestCase, result: TestResult) {
+  onTestEnd(_test: TestCase, _result: TestResult) {
     // Optional: Track test end
   }
 
-  async onEnd(result: FullResult) {
+  async onEnd(_result: FullResult) {
     // This runs after all tests complete and after other reporters have written their output
     console.log('\n=== Running AI Analysis ===');
     
