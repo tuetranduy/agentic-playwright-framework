@@ -16,3 +16,5 @@ coverage/
 # But keep config files
 !playwright.config.js
 !*.config.js
+# Keep dashboard files
+!dashboard/**/*.js
