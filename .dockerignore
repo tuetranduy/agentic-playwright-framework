@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.md
+.env
+.env.local
+test-results/*.zip
+test-results/*.png
+test-results/trace.zip
+dist
+logs
+*.log
+.DS_Store
+.vscode
+.idea

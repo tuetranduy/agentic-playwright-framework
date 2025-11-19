@@ -23,7 +23,14 @@ An intelligent test automation framework built on Playwright with AI-powered sel
 - Automatic logging of all actions
 - Smart element finding with multiple fallback strategies
 
-### 4. **Production-Ready Architecture**
+### 4. **Interactive Dashboard**
+- Modern, friendly web UI for visualizing test results
+- Real-time test execution statistics and charts
+- Healed locators tracking and analysis
+- AI insights visualization
+- Docker support for easy deployment
+
+### 5. **Production-Ready Architecture**
 - TypeScript for type safety
 - Structured logging with Winston
 - Configurable framework settings
@@ -134,8 +141,58 @@ npm run test:headed
 
 # Run with debugging
 npm run test:debug
+```
 
-# Build the framework
+### 4. View Results in Dashboard
+
+```bash
+# Start the dashboard
+npm run dashboard
+
+# Or run with Docker
+npm run dashboard:docker
+```
+
+Then open your browser to `http://localhost:3000` to view the interactive dashboard with:
+- Test execution statistics
+- Pass/fail charts
+- Detailed failure information
+- Healed locators tracking
+- AI-powered insights
+
+See [Dashboard README](./dashboard/README.md) for more details.
+
+## 📊 Test Dashboard
+
+The framework includes a beautiful, modern dashboard for visualizing test results and healed locators.
+
+### Features
+- 📈 **Interactive Charts**: Visual representation of test results
+- 🔍 **Search & Filter**: Quickly find specific tests or locators
+- 🤖 **AI Insights**: View AI analysis of failures
+- 🔧 **Healed Locators**: Track self-healing activity
+- 🐳 **Docker Support**: Easy deployment
+
+### Running the Dashboard
+
+**Option 1: Local**
+```bash
+npm run dashboard
+```
+
+**Option 2: Docker**
+```bash
+npm run dashboard:docker
+```
+
+**Option 3: Docker Compose**
+```bash
+docker-compose up -d
+```
+
+Visit `http://localhost:3000` to access the dashboard.
+
+### Build the framework
 npm run build
 ```
 

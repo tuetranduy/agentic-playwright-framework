@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Playwright Framework - Test Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>🤖 Agentic Playwright Dashboard</h1>
+                <p class="subtitle">AI-Powered Test Results & Self-Healing Locators</p>
+            </div>
+            <button id="refreshBtn" class="refresh-btn">
+                <span class="refresh-icon">↻</span> Refresh
+            </button>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Tests</div>
+                    <div class="stat-value" id="totalTests">-</div>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <div class="stat-label">Passed</div>
+                    <div class="stat-value" id="passedTests">-</div>
+                </div>
+            </div>
+            <div class="stat-card failure">
+                <div class="stat-icon">❌</div>
+                <div class="stat-content">
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value" id="failedTests">-</div>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon">⏭️</div>
+                <div class="stat-content">
+                    <div class="stat-label">Skipped</div>
+                    <div class="stat-value" id="skippedTests">-</div>
+                </div>
+            </div>
+            <div class="stat-card healing">
+                <div class="stat-icon">🔧</div>
+                <div class="stat-content">
+                    <div class="stat-label">Healed Locators</div>
+                    <div class="stat-value" id="healedCount">-</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value" id="successRate">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="failures">Test Failures</button>
+            <button class="tab-btn" data-tab="healed">Healed Locators</button>
+            <button class="tab-btn" data-tab="ai-insights">AI Insights</button>
+        </div>
+
+        <div class="tab-content active" id="overview">
+            <div class="card">
+                <h2>Test Execution Overview</h2>
+                <div id="overviewChart" class="chart-container">
+                    <canvas id="testChart"></canvas>
+                </div>
+                <div id="overviewDetails" class="overview-details">
+                    <p class="loading">Loading test results...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="failures">
+            <div class="card">
+                <h2>Test Failures</h2>
+                <div class="search-box">
+                    <input type="text" id="failureSearch" placeholder="Search failures...">
+                </div>
+                <div id="failuresList" class="failures-list">
+                    <p class="loading">Loading failures...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="healed">
+            <div class="card">
+                <h2>Self-Healed Locators</h2>
+                <div class="search-box">
+                    <input type="text" id="healedSearch" placeholder="Search healed locators...">
+                </div>
+                <div id="healedLocatorsList" class="healed-list">
+                    <p class="loading">Loading healed locators...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="ai-insights">
+            <div class="card">
+                <h2>AI Analysis & Insights</h2>
+                <div id="aiInsightContent" class="ai-insights-content">
+                    <p class="loading">Loading AI insights...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Last updated: <span id="lastUpdated">-</span></p>
+            <p>Powered by Agentic Playwright Framework</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
