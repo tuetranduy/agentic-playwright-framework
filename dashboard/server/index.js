@@ -52,6 +52,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', rateLimiter);
 
 // API endpoint to get test results summary
+// Note: Rate limiting is applied via the rateLimiter middleware above
 app.get('/api/test-results', (req, res) => {
   try {
     const resultsDir = path.join(__dirname, '../../test-results');
@@ -103,6 +104,7 @@ app.get('/api/test-results', (req, res) => {
 });
 
 // API endpoint to get list of all test result files
+// Note: Rate limiting is applied via the rateLimiter middleware above
 app.get('/api/test-files', (req, res) => {
   try {
     const resultsDir = path.join(__dirname, '../../test-results');
