@@ -1,0 +1,21 @@
+{
+  "name": "agentic-playwright-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard for visualizing Agentic Playwright Framework test results and healed locators",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "keywords": [
+    "dashboard",
+    "playwright",
+    "testing",
+    "visualization"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
