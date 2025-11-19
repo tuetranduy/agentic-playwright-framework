@@ -5,8 +5,51 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Simple in-memory rate limiting
+const requestCounts = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS = 100; // Max requests per window
+
+function rateLimiter(req, res, next) {
+  const clientId = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!requestCounts.has(clientId)) {
+    requestCounts.set(clientId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+  
+  const clientData = requestCounts.get(clientId);
+  
+  if (now > clientData.resetTime) {
+    clientData.count = 1;
+    clientData.resetTime = now + RATE_LIMIT_WINDOW;
+    return next();
+  }
+  
+  if (clientData.count >= MAX_REQUESTS) {
+    return res.status(429).json({ error: 'Too many requests, please try again later' });
+  }
+  
+  clientData.count++;
+  next();
+}
+
+// Clean up old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [clientId, data] of requestCounts.entries()) {
+    if (now > data.resetTime) {
+      requestCounts.delete(clientId);
+    }
+  }
+}, 5 * 60 * 1000);
+
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Apply rate limiting to API routes
+app.use('/api', rateLimiter);
 
 // API endpoint to get test results summary
 app.get('/api/test-results', (req, res) => {
