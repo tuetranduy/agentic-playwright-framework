@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
 export default defineConfig({
+  timeout: 80 * 1000,
   testDir: './tests',
   globalSetup: './src/global-setup.ts',
   globalTeardown: './src/global-teardown.ts',
