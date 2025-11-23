@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ExampleLoginPage } from '../pages/example-login.page';
-import { logger } from '../../src';
+import { logger } from '../src';
 
 test.describe('Example Login Tests with Agentic Framework', () => {
   let loginPage: ExampleLoginPage;

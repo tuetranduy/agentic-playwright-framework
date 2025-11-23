@@ -1,5 +1,5 @@
-import { AgenticPage } from '../../src/core/agentic-page';
 import { Page } from '@playwright/test';
+import { AgenticPage } from '../src/core/agentic-page';
 
 export class ExampleLoginPage extends AgenticPage {
   private readonly usernameInput = '#username';
