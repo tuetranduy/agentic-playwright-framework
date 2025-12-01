@@ -54,12 +54,12 @@ export class AIService {
                       Element description: ${elementDescription}
                       Page HTML snippet: ${pageContent}
 
-                      Please suggest 3-5 alternative Playwright selectors that might work better. Focus on:
-                      1. Text-based selectors
+                      Please suggest 5-8 alternative Playwright selectors that might work better based on Page HTML snippet. Focus on:
+                      1. XPath
                       2. Role-based selectors (getByRole)
                       3. Test IDs
                       4. Robust CSS selectors
-                      5. XPath as last resort
+                      5. Text-based selectors
 
                       Return ONLY the selectors, one per line, without explanation.`;
 
