@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import fs from 'fs';
 
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -17,6 +18,12 @@ export class Logger {
 
   static getInstance(): winston.Logger {
     if (!Logger.instance) {
+      // Ensure logs directory exists
+      const logsDir = path.join(process.cwd(), 'logs');
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+
       Logger.instance = winston.createLogger({
         level: process.env.LOG_LEVEL || 'info',
         format: logFormat,
